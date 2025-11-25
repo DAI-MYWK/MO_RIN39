@@ -27,20 +27,20 @@ export default function PatternRecommendedFocused({
   const otherItems = menuData.filter(item => !recommendedItems.includes(item));
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-air-gray">
       {/* ヘッダー */}
-      <header className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4">
-        <h1 className="text-xl font-bold">RIGOLETTO</h1>
-        <p className="text-sm opacity-90">モバイルオーダー</p>
+      <header className="bg-white text-air-text border-b border-air-gray-border p-4 sticky top-0 z-10">
+        <h1 className="text-xl font-bold text-air-blue">Recruit</h1>
+        <p className="text-sm text-air-text-secondary">モバイルオーダー</p>
       </header>
 
       <div className="flex-1 overflow-y-auto">
         {/* おすすめセクション */}
         {recommendedItems.length > 0 && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 border-b-4 border-yellow-400">
+          <div className="bg-air-blue-light p-4 border-b-2 border-air-blue">
             <div className="flex items-center gap-2 mb-4">
-              <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-              <h2 className="text-xl font-bold text-gray-900">おすすめメニュー</h2>
+              <Star className="w-6 h-6 text-air-blue fill-air-blue" />
+              <h2 className="text-xl font-bold text-air-blue-hover">おすすめメニュー</h2>
             </div>
             <div className="space-y-4">
               {recommendedItems.map((item, index) => {
@@ -50,7 +50,7 @@ export default function PatternRecommendedFocused({
                 return (
                   <div 
                     key={item.id} 
-                    className={`bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow relative ${
+                    className={`bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow relative ${
                       showHeatmap ? `border-l-4 ${weightColorClass.split(' ')[1]}` : ''
                     }`}
                   >
@@ -80,12 +80,12 @@ export default function PatternRecommendedFocused({
                             <EditableText
                               value={item.name}
                               onChange={(value) => updateMenuItemName(item.id, value)}
-                              className="font-bold text-lg text-gray-900 block"
+                              className="font-bold text-lg text-air-text block"
                             />
                           ) : (
-                            <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
+                            <h3 className="font-bold text-lg text-air-text">{item.name}</h3>
                           )}
-                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                          <span className="bg-air-blue-hover text-white text-xs px-2 py-1 rounded-full font-bold shadow-sm">
                             おすすめ
                           </span>
                         </div>
@@ -93,13 +93,13 @@ export default function PatternRecommendedFocused({
                           <EditableText
                             value={item.description || ''}
                             onChange={(value) => updateMenuItemDescription(item.id, value)}
-                            className="text-sm text-gray-600 mb-2 line-clamp-2 block"
+                            className="text-sm text-air-text-secondary mb-2 line-clamp-2 block"
                             placeholder="説明を追加..."
                             multiline
                           />
                         ) : (
                           item.description && (
-                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{item.description}</p>
+                            <p className="text-sm text-air-text-secondary mb-2 line-clamp-2">{item.description}</p>
                           )
                         )}
                         <div className="flex items-center justify-between">
@@ -107,10 +107,10 @@ export default function PatternRecommendedFocused({
                             <EditableText
                               value={item.price}
                               onChange={(value) => updateMenuItemPrice(item.id, value)}
-                              className="text-xl font-bold text-gray-900"
+                              className="text-xl font-bold text-air-blue"
                             />
                           ) : (
-                            <span className="text-xl font-bold text-gray-900">{item.price}</span>
+                            <span className="text-xl font-bold text-air-blue">{item.price}</span>
                           )}
                           <div className="flex items-center gap-2">
                             {editable && (
@@ -121,7 +121,7 @@ export default function PatternRecommendedFocused({
                                 おすすめ解除
                               </button>
                             )}
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                            <ChevronRight className="w-5 h-5 text-air-blue opacity-50" />
                           </div>
                         </div>
                       </div>
@@ -136,10 +136,10 @@ export default function PatternRecommendedFocused({
         {/* その他のメニュー */}
         {otherItems.length > 0 && (
           <div className="p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">その他のメニュー</h2>
+            <h2 className="text-lg font-bold text-air-text mb-4">その他のメニュー</h2>
             <div className="space-y-3">
               {otherItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <div key={item.id} className="flex items-center gap-4 p-3 bg-white border border-air-gray-border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                   {item.imageUrl && (
                     <img
                       src={item.imageUrl}
@@ -151,10 +151,10 @@ export default function PatternRecommendedFocused({
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
-                    <span className="text-lg font-bold text-gray-900">{item.price}</span>
+                    <h3 className="font-bold text-air-text mb-1">{item.name}</h3>
+                    <span className="text-lg font-bold text-air-blue">{item.price}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-5 h-5 text-air-blue opacity-50" />
                 </div>
               ))}
             </div>

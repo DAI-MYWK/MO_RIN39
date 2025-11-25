@@ -230,14 +230,32 @@ export async function POST(request: NextRequest) {
           // 価格を探す（親要素内のテキスト全体から）
           let price = '';
           const $parent = $h4.parent();
+          
+          // 親要素のさらに親要素も確認（タイトルがdivで囲まれている場合など）
+          // ただし、あまり広げすぎると他のメニューの価格を拾ってしまうので注意
+          // 一般的なカード型レイアウトを想定して2階層上まで確認
+          const $grandParent = $parent.parent();
+          
+          // まず、h4の直近のテキストや兄弟要素から探す
           const $next = $h4.next();
           const $nextText = $h4.nextUntil('h4').first();
           
           // 親要素のテキスト全体から価格を抽出
-          const parentText = $parent.text();
-          const searchText = ($nextText.length > 0 ? $nextText.text() : '') || 
+          let searchText = ($nextText.length > 0 ? $nextText.text() : '') || 
                             ($next.length > 0 ? $next.text() : '') || 
-                            parentText;
+                            $parent.text();
+          
+          // 親要素で見つからない場合、親の親（アイテムコンテナ）のテキストも含める
+          // ただし、テキストが長すぎる（複数のメニューを含んでいる可能性がある）場合は除外
+          if ($grandParent.length > 0 && $grandParent.text().length < 1000) {
+             // 親の親の中に .price クラスや .item_price クラスがあるか確認
+             const $priceElem = $grandParent.find('.price, .item_price, .menu_price, .r-menu-price, .tit_price').first();
+             if ($priceElem.length > 0) {
+               searchText += ' ' + $priceElem.text();
+             } else {
+               searchText += ' ' + $grandParent.text();
+             }
+          }
           
           // メニュー名を除いたテキストから価格を探す
           const textWithoutName = searchText.replace(name, '').trim();

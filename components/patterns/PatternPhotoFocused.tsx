@@ -25,11 +25,11 @@ export default function PatternPhotoFocused({
   const toggleRecommended = useMenuStore((state) => state.toggleRecommended);
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-air-gray">
       {/* ヘッダー */}
-      <header className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4">
-        <h1 className="text-xl font-bold">RIGOLETTO</h1>
-        <p className="text-sm opacity-90">モバイルオーダー</p>
+      <header className="bg-white text-air-text border-b border-air-gray-border p-4 sticky top-0 z-10">
+        <h1 className="text-xl font-bold text-air-blue">Recruit</h1>
+        <p className="text-sm text-air-text-secondary">モバイルオーダー</p>
       </header>
 
       {/* メニューグリッド（写真重視） */}
@@ -43,7 +43,7 @@ export default function PatternPhotoFocused({
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className={`relative bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow ${
+                className={`relative bg-white rounded-lg overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow ${
                   showHeatmap ? `border-2 ${weightColorClass.split(' ')[1]}` : ''
                 }`}
               >
@@ -75,23 +75,23 @@ export default function PatternPhotoFocused({
                     <EditableText
                       value={item.name}
                       onChange={(value) => updateMenuItemName(item.id, value)}
-                      className="font-semibold text-sm text-gray-900 mb-1 line-clamp-1 block"
+                      className="font-bold text-sm text-air-text mb-1 line-clamp-1 block"
                     />
                   ) : (
-                    <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-1">{item.name}</h3>
+                    <h3 className="font-bold text-sm text-air-text mb-1 line-clamp-1">{item.name}</h3>
                   )}
                   {editable ? (
                     <EditableText
                       value={item.price}
                       onChange={(value) => updateMenuItemPrice(item.id, value)}
-                      className="text-lg font-bold text-gray-900 block"
+                      className="text-lg font-bold text-air-blue block"
                     />
                   ) : (
-                    <p className="text-lg font-bold text-gray-900">{item.price}</p>
+                    <p className="text-lg font-bold text-air-blue">{item.price}</p>
                   )}
                 </div>
                 {item.isRecommended && (
-                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  <div className="absolute top-2 right-2 bg-air-blue-hover text-white text-xs px-2 py-1 rounded-full font-bold shadow-sm">
                     おすすめ
                   </div>
                 )}
@@ -119,7 +119,7 @@ export default function PatternPhotoFocused({
       {/* モーダル（選択時） */}
       {selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto shadow-xl">
             {selectedItem.imageUrl && (
               <img
                 src={selectedItem.imageUrl}
@@ -128,20 +128,20 @@ export default function PatternPhotoFocused({
               />
             )}
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedItem.name}</h2>
+              <h2 className="text-2xl font-bold text-air-text mb-2">{selectedItem.name}</h2>
               {selectedItem.description && (
-                <p className="text-gray-600 mb-4">{selectedItem.description}</p>
+                <p className="text-air-text-secondary mb-4">{selectedItem.description}</p>
               )}
               <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl font-bold text-gray-900">{selectedItem.price}</span>
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <span className="text-2xl font-bold text-air-blue">{selectedItem.price}</span>
+                <button className="bg-air-blue text-white px-6 py-2 rounded-lg hover:bg-air-blue-hover flex items-center gap-2 shadow-sm">
                   <Plus className="w-5 h-5" />
                   カートに追加
                 </button>
               </div>
               <button
                 onClick={() => setSelectedItem(null)}
-                className="w-full py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                className="w-full py-2 border border-air-gray-border rounded-lg text-air-text-secondary hover:bg-air-gray"
               >
                 閉じる
               </button>

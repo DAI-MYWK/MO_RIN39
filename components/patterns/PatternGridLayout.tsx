@@ -22,11 +22,11 @@ export default function PatternGridLayout({
   const updateMenuItemDescription = useMenuStore((state) => state.updateMenuItemDescription);
   const toggleRecommended = useMenuStore((state) => state.toggleRecommended);
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-air-gray">
       {/* ヘッダー */}
-      <header className="bg-gray-800 text-white p-4">
-        <h1 className="text-xl font-bold">RIGOLETTO</h1>
-        <p className="text-sm opacity-90">モバイルオーダー</p>
+      <header className="bg-white text-air-text border-b border-air-gray-border p-4 sticky top-0 z-10">
+        <h1 className="text-xl font-bold text-air-blue">Recruit</h1>
+        <p className="text-sm text-air-text-secondary">モバイルオーダー</p>
       </header>
 
       {/* グリッドレイアウト */}
@@ -39,7 +39,7 @@ export default function PatternGridLayout({
             return (
               <div
                 key={item.id}
-                className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer relative ${
+                className={`bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${
                   showHeatmap ? `border-2 ${weightColorClass.split(' ')[1]}` : ''
                 }`}
               >
@@ -71,10 +71,10 @@ export default function PatternGridLayout({
                     <EditableText
                       value={item.name}
                       onChange={(value) => updateMenuItemName(item.id, value)}
-                      className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem] block"
+                      className="font-bold text-sm text-air-text mb-1 line-clamp-2 min-h-[2.5rem] block"
                     />
                   ) : (
-                    <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]">
+                    <h3 className="font-bold text-sm text-air-text mb-1 line-clamp-2 min-h-[2.5rem]">
                       {item.name}
                     </h3>
                   )}
@@ -82,12 +82,12 @@ export default function PatternGridLayout({
                     <EditableText
                       value={item.description || ''}
                       onChange={(value) => updateMenuItemDescription(item.id, value)}
-                      className="text-xs text-gray-500 mb-2 line-clamp-1 block"
+                      className="text-xs text-air-text-secondary mb-2 line-clamp-1 block"
                       placeholder="説明を追加..."
                     />
                   ) : (
                     item.description && (
-                      <p className="text-xs text-gray-500 mb-2 line-clamp-1">{item.description}</p>
+                      <p className="text-xs text-air-text-secondary mb-2 line-clamp-1">{item.description}</p>
                     )
                   )}
                   <div className="flex items-center justify-between">
@@ -95,10 +95,10 @@ export default function PatternGridLayout({
                       <EditableText
                         value={item.price}
                         onChange={(value) => updateMenuItemPrice(item.id, value)}
-                        className="text-base font-bold text-gray-900"
+                        className="text-base font-bold text-air-blue"
                       />
                     ) : (
-                      <span className="text-base font-bold text-gray-900">{item.price}</span>
+                      <span className="text-base font-bold text-air-blue">{item.price}</span>
                     )}
                     <div className="flex items-center gap-2">
                       {editable && (
@@ -113,7 +113,7 @@ export default function PatternGridLayout({
                           {item.isRecommended ? '★' : '☆'}
                         </button>
                       )}
-                      <button className="bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700">
+                      <button className="bg-air-blue text-white p-1.5 rounded-full hover:bg-air-blue-hover">
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>

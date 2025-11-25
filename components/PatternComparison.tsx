@@ -145,6 +145,10 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
 
   const LeftComponent = patterns.find(p => p.id === selectedPatterns[0])?.component || PatternCategoryFocused;
   const RightComponent = patterns.find(p => p.id === selectedPatterns[1])?.component || PatternPhotoFocused;
+  const singleViewPatterns = patterns.filter((p) => p.id !== 'grid-layout');
+  const singleViewDeviceWidth = device === 'iphone-15-pro-max' ? 430 : 375;
+  const singleViewCardMaxWidth = singleViewDeviceWidth + 96;
+  const singleViewColumnMinWidth = 320;
 
   return (
     <div className="space-y-6">
@@ -205,54 +209,56 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                 </select>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 flex-wrap">
-              <button
-                onClick={() => setEditable(!editable)}
-                className={`px-4 py-2 text-sm rounded-lg flex items-center gap-2 ${
-                  editable
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <Edit3 className="w-4 h-4" />
-                {editable ? '編集モードON' : '編集モードOFF'}
-              </button>
-              <button
-                onClick={() => setShowHeatmap(!showHeatmap)}
-                className={`px-4 py-2 text-sm rounded-lg flex items-center gap-2 ${
-                  showHeatmap
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {showHeatmap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                ヒートマップ
-              </button>
-              <button
-                onClick={() => setScrollSyncEnabled(!scrollSyncEnabled)}
-                className={`px-4 py-2 text-sm rounded-lg ${
-                  scrollSyncEnabled
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                スクロール同期: {scrollSyncEnabled ? 'ON' : 'OFF'}
-              </button>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">デバイス</label>
-                <select
-                  value={device}
-                  onChange={(e) => setDevice(e.target.value as 'iphone-se' | 'iphone-15-pro-max')}
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="iphone-se">iPhone SE</option>
-                  <option value="iphone-15-pro-max">iPhone 15 Pro Max</option>
-                </select>
-              </div>
-            </div>
           </div>
         )}
+
+        <div className="flex items-center gap-4 flex-wrap mt-4">
+          <button
+            onClick={() => setEditable(!editable)}
+            className={`px-4 py-2 text-sm rounded-lg flex items-center gap-2 ${
+              editable
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Edit3 className="w-4 h-4" />
+            {editable ? '編集モードON' : '編集モードOFF'}
+          </button>
+          <button
+            onClick={() => setShowHeatmap(!showHeatmap)}
+            className={`px-4 py-2 text-sm rounded-lg flex items-center gap-2 ${
+              showHeatmap
+                ? 'bg-red-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {showHeatmap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            ヒートマップ
+          </button>
+          {viewMode === 'side-by-side' && (
+            <button
+              onClick={() => setScrollSyncEnabled(!scrollSyncEnabled)}
+              className={`px-4 py-2 text-sm rounded-lg ${
+                scrollSyncEnabled
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              スクロール同期: {scrollSyncEnabled ? 'ON' : 'OFF'}
+            </button>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">デバイス</label>
+            <select
+              value={device}
+              onChange={(e) => setDevice(e.target.value as 'iphone-se' | 'iphone-15-pro-max')}
+              className="px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="iphone-se">iPhone SE</option>
+              <option value="iphone-15-pro-max">iPhone 15 Pro Max</option>
+            </select>
+          </div>
+        </div>
 
         <p className="text-sm text-gray-600 mt-4">
           {viewMode === 'side-by-side' 
@@ -275,7 +281,6 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                 <div 
                   ref={leftRef}
                   className="w-full h-full overflow-y-auto" 
-                  style={{ minHeight: device === 'iphone-se' ? '667px' : '932px' }}
                 >
                   <LeftComponent menuData={menuData} showHeatmap={showHeatmap} editable={editable} />
                 </div>
@@ -294,7 +299,6 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                 <div 
                   ref={rightRef}
                   className="w-full h-full overflow-y-auto" 
-                  style={{ minHeight: device === 'iphone-se' ? '667px' : '932px' }}
                 >
                   <RightComponent menuData={menuData} showHeatmap={showHeatmap} editable={editable} />
                 </div>
@@ -305,12 +309,21 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
       )}
 
       {viewMode === 'single' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {patterns.map((pattern) => {
+        <div
+          className="grid gap-4 justify-items-center"
+          style={{
+            gridTemplateColumns: `repeat(auto-fit, minmax(${Math.min(singleViewColumnMinWidth, singleViewCardMaxWidth)}px, 1fr))`,
+          }}
+        >
+          {singleViewPatterns.map((pattern) => {
             const Component = pattern.component;
             
             return (
-              <div key={pattern.id} className="bg-white rounded-lg shadow overflow-hidden">
+              <div
+                key={pattern.id}
+                className="bg-white rounded-lg shadow overflow-hidden flex flex-col w-full"
+                style={{ maxWidth: `${singleViewCardMaxWidth}px` }}
+              >
                 <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                   <h3 className="font-semibold text-gray-900">{pattern.name}</h3>
                   <button
@@ -323,10 +336,12 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                     <Maximize2 className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="bg-gray-100 p-4">
-                  <div className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden" style={{ minHeight: '400px' }}>
-                    <Component menuData={menuData} showHeatmap={showHeatmap} editable={editable} />
-                  </div>
+                <div className="bg-gray-100 p-4 flex-1 flex justify-center overflow-hidden" style={{ maxHeight: '780px' }}>
+                  <DeviceSimulator device={device} maxHeight="738px">
+                    <div className="w-full h-full overflow-y-auto">
+                      <Component menuData={menuData} showHeatmap={showHeatmap} editable={editable} />
+                    </div>
+                  </DeviceSimulator>
                 </div>
               </div>
             );

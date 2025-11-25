@@ -30,23 +30,23 @@ export default function PatternCategoryFocused({
     : menuData.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-air-gray">
       {/* ヘッダー */}
-      <header className="bg-blue-600 text-white p-4">
-        <h1 className="text-xl font-bold">RIGOLETTO</h1>
-        <p className="text-sm opacity-90">モバイルオーダー</p>
+      <header className="bg-white text-air-text border-b border-air-gray-border p-4 sticky top-0 z-10">
+        <h1 className="text-xl font-bold text-air-blue">Recruit</h1>
+        <p className="text-sm text-air-text-secondary">モバイルオーダー</p>
       </header>
 
       {/* カテゴリタブ */}
-      <div className="flex overflow-x-auto border-b border-gray-200 bg-gray-50">
+      <div className="flex overflow-x-auto border-b border-air-gray-border bg-white sticky top-[76px] z-10">
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
             className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               selectedCategory === category
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-air-blue text-air-blue'
+                : 'border-transparent text-air-text-secondary hover:text-air-text'
             }`}
           >
             {category === 'all' ? 'すべて' : category}
@@ -55,13 +55,13 @@ export default function PatternCategoryFocused({
       </div>
 
       {/* メニューリスト */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-4">
         {filteredMenu.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-air-text-secondary">
             メニューがありません
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="space-y-3">
             {filteredMenu.map((item, index) => {
               const visualWeight = calculateVisualWeight(item, menuData, 'category-focused', menuData.indexOf(item));
               const weightColorClass = getVisualWeightColorClass(visualWeight);
@@ -69,7 +69,7 @@ export default function PatternCategoryFocused({
               return (
                 <div 
                   key={item.id} 
-                  className={`p-4 hover:bg-gray-50 cursor-pointer relative ${
+                  className={`p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${
                     showHeatmap ? `border-l-4 ${weightColorClass.split(' ')[1]}` : ''
                   }`}
                 >
@@ -98,22 +98,22 @@ export default function PatternCategoryFocused({
                         <EditableText
                           value={item.name}
                           onChange={(value) => updateMenuItemName(item.id, value)}
-                          className="font-semibold text-gray-900 mb-1 block"
+                          className="font-bold text-air-text mb-1 block"
                         />
                       ) : (
-                        <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
+                        <h3 className="font-bold text-air-text mb-1">{item.name}</h3>
                       )}
                       {editable ? (
                         <EditableText
                           value={item.description || ''}
                           onChange={(value) => updateMenuItemDescription(item.id, value)}
-                          className="text-sm text-gray-600 mb-2 line-clamp-2 block"
+                          className="text-sm text-air-text-secondary mb-2 line-clamp-2 block"
                           placeholder="説明を追加..."
                           multiline
                         />
                       ) : (
                         item.description && (
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{item.description}</p>
+                          <p className="text-sm text-air-text-secondary mb-2 line-clamp-2">{item.description}</p>
                         )
                       )}
                       <div className="flex items-center justify-between">
@@ -121,11 +121,11 @@ export default function PatternCategoryFocused({
                           <EditableText
                             value={item.price}
                             onChange={(value) => updateMenuItemPrice(item.id, value)}
-                            className="text-lg font-bold text-gray-900"
+                            className="text-lg font-bold text-air-blue"
                             placeholder="価格"
                           />
                         ) : (
-                          <span className="text-lg font-bold text-gray-900">{item.price}</span>
+                          <span className="text-lg font-bold text-air-blue">{item.price}</span>
                         )}
                         <div className="flex items-center gap-2">
                           {editable && (
@@ -143,7 +143,7 @@ export default function PatternCategoryFocused({
                               {item.isRecommended ? 'おすすめ' : '通常'}
                             </button>
                           )}
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                          <ChevronRight className="w-5 h-5 text-air-blue opacity-50" />
                         </div>
                       </div>
                     </div>

@@ -4,10 +4,11 @@ import { useState } from 'react';
 import MenuScraper from '@/components/MenuScraper';
 import UIPatternViewer from '@/components/UIPatternViewer';
 import PatternComparison from '@/components/PatternComparison';
+import SalesTalkRecommendation from '@/components/SalesTalkRecommendation';
 
 export default function Home() {
   const [menuData, setMenuData] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'scraper' | 'viewer' | 'comparison'>('scraper');
+  const [viewMode, setViewMode] = useState<'scraper' | 'viewer' | 'comparison' | 'talk'>('scraper');
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -55,6 +56,16 @@ export default function Home() {
             >
               パターン比較
             </button>
+            <button
+              onClick={() => setViewMode('talk')}
+              className={`px-4 py-2 text-sm font-medium ${
+                viewMode === 'talk'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              営業トーク
+            </button>
           </div>
         </div>
       </nav>
@@ -68,6 +79,9 @@ export default function Home() {
         )}
         {viewMode === 'comparison' && (
           <PatternComparison menuData={menuData} />
+        )}
+        {viewMode === 'talk' && (
+          <SalesTalkRecommendation />
         )}
       </div>
     </main>

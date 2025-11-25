@@ -6,6 +6,7 @@ interface DeviceSimulatorProps {
   children: ReactNode;
   device: 'iphone-se' | 'iphone-15-pro-max';
   onChange?: (device: 'iphone-se' | 'iphone-15-pro-max') => void;
+  maxHeight?: string;
 }
 
 const deviceSizes = {
@@ -13,11 +14,18 @@ const deviceSizes = {
   'iphone-15-pro-max': { width: '430px', height: '932px', name: 'iPhone 15 Pro Max' },
 };
 
-export default function DeviceSimulator({ children, device, onChange }: DeviceSimulatorProps) {
+const parseDimension = (value: string) => parseInt(value.replace('px', ''), 10);
+
+export default function DeviceSimulator({ children, device, onChange, maxHeight }: DeviceSimulatorProps) {
   const size = deviceSizes[device];
+  const screenWidth = parseDimension(size.width);
+  const screenHeight = parseDimension(size.height);
+  const framePadding = 16; // p-2 = 0.5rem ≒ 8px * 2
+  const frameWidth = screenWidth + framePadding;
+  const frameHeight = screenHeight + framePadding;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full">
       {onChange && (
         <div className="mb-4">
           <select
@@ -31,20 +39,17 @@ export default function DeviceSimulator({ children, device, onChange }: DeviceSi
         </div>
       )}
       <div
-        className="bg-gray-800 rounded-[2.5rem] p-2 shadow-2xl"
+        className="bg-gray-800 rounded-[2.5rem] p-2 shadow-2xl w-full"
         style={{
-          width: `calc(${size.width} + 16px)`,
-          height: `calc(${size.height} + 16px)`,
+          maxWidth: `${frameWidth}px`,
+          aspectRatio: maxHeight ? undefined : `${frameWidth} / ${frameHeight}`,
+          maxHeight: maxHeight,
         }}
       >
-        <div
-          className="bg-white rounded-[2rem] overflow-hidden"
-          style={{
-            width: size.width,
-            height: size.height,
-          }}
-        >
-          {children}
+        <div className="bg-white rounded-[2rem] overflow-hidden w-full h-full">
+          <div className="w-full h-full">
+            {children}
+          </div>
         </div>
       </div>
     </div>
