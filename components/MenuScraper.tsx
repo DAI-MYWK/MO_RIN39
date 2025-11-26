@@ -93,14 +93,14 @@ export default function MenuScraper({ onDataCollected }: MenuScraperProps) {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">メニュー情報の収集</h2>
+        <h2 className="text-xl font-bold text-[#333333] mb-4">メニュー情報の収集</h2>
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#333333] mb-2">
               URL（食べログまたはホットペッパーグルメ）
             </label>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-[#666666] mb-2">
               ホットペッパーグルメの例: https://www.hotpepper.jp/strJ001221223/food/ （料理）または /drink/ （ドリンク）
             </p>
             <div className="flex gap-2">
@@ -109,12 +109,12 @@ export default function MenuScraper({ onDataCollected }: MenuScraperProps) {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://tabelog.com/..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0099E6] focus:border-[#0099E6]"
               />
               <button
                 onClick={handleScrape}
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-2 bg-[#0099E6] text-white rounded-lg hover:bg-[#0088cc] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -132,7 +132,7 @@ export default function MenuScraper({ onDataCollected }: MenuScraperProps) {
           </div>
 
           {error && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+            <div className="p-4 bg-[#EBF7FF] border border-gray-200 rounded-lg text-[#666666]">
               {error}
             </div>
           )}
@@ -140,13 +140,13 @@ export default function MenuScraper({ onDataCollected }: MenuScraperProps) {
           {menuItems.length > 0 && (
             <div className="mt-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-[#333333]">
                   収集したメニュー ({menuItems.length}件)
                 </h3>
                 <div className="flex gap-2">
                   <button
                     onClick={handleAddManual}
-                    className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                    className="px-4 py-2 text-sm bg-gray-100 text-[#333333] rounded-lg hover:bg-gray-200"
                   >
                     + 手動追加
                   </button>

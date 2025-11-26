@@ -54,7 +54,7 @@ function useScrollSync(leftRef: React.RefObject<HTMLDivElement>, rightRef: React
 
 export default function PatternComparison({ menuData: initialMenuData }: PatternComparisonProps) {
   const [expandedPattern, setExpandedPattern] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'side-by-side' | 'single'>('side-by-side');
+  const [viewMode, setViewMode] = useState<'side-by-side' | 'single'>('single');
   const [selectedPatterns, setSelectedPatterns] = useState<[UIPattern, UIPattern]>(['category-focused', 'photo-focused']);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [editable, setEditable] = useState(false);
@@ -85,7 +85,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
   if (menuData.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-8 text-center">
-        <p className="text-gray-600">メニューデータがありません。まず「メニュー収集」タブでデータを収集してください。</p>
+        <p className="text-[#666666]">メニューデータがありません。まず「メニュー収集」タブでデータを収集してください。</p>
       </div>
     );
   }
@@ -98,14 +98,14 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
       <div className="space-y-4">
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">{pattern?.name}</h2>
+            <h2 className="text-xl font-bold text-[#333333]">{pattern?.name}</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setEditable(!editable)}
                 className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-2 ${
                   editable
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-[#0099E6] text-white'
+                    : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
                 }`}
               >
                 <Edit3 className="w-4 h-4" />
@@ -116,7 +116,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                 className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-2 ${
                   showHeatmap
                     ? 'bg-red-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
                 }`}
               >
                 {showHeatmap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -124,7 +124,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
               </button>
               <button
                 onClick={() => setViewMode('side-by-side')}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+                className="px-4 py-2 bg-gray-100 text-[#333333] rounded-lg hover:bg-gray-200 flex items-center gap-2"
               >
                 <Minimize2 className="w-4 h-4" />
                 比較モードに戻る
@@ -154,14 +154,14 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">UIパターン比較</h2>
+          <h2 className="text-xl font-bold text-[#333333]">UIパターン比較</h2>
           <div className="flex gap-2">
             <button
               onClick={() => setViewMode('side-by-side')}
               className={`px-4 py-2 text-sm rounded-lg ${
                 viewMode === 'side-by-side'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#0099E6] text-white'
+                  : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
               }`}
             >
               サイドバイサイド
@@ -170,8 +170,8 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
               onClick={() => setViewMode('single')}
               className={`px-4 py-2 text-sm rounded-lg ${
                 viewMode === 'single'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#0099E6] text-white'
+                  : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
               }`}
             >
               単一表示
@@ -185,7 +185,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
             
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">左のパターン</label>
+                <label className="block text-sm font-medium text-[#333333] mb-2">左のパターン</label>
                 <select
                   value={selectedPatterns[0]}
                   onChange={(e) => setSelectedPatterns([e.target.value as UIPattern, selectedPatterns[1]])}
@@ -197,7 +197,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                 </select>
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">右のパターン</label>
+                <label className="block text-sm font-medium text-[#333333] mb-2">右のパターン</label>
                 <select
                   value={selectedPatterns[1]}
                   onChange={(e) => setSelectedPatterns([selectedPatterns[0], e.target.value as UIPattern])}
@@ -217,8 +217,8 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
             onClick={() => setEditable(!editable)}
             className={`px-4 py-2 text-sm rounded-lg flex items-center gap-2 ${
               editable
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-[#0099E6] text-white'
+                : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
             }`}
           >
             <Edit3 className="w-4 h-4" />
@@ -229,7 +229,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
             className={`px-4 py-2 text-sm rounded-lg flex items-center gap-2 ${
               showHeatmap
                 ? 'bg-red-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
             }`}
           >
             {showHeatmap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -241,14 +241,14 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
               className={`px-4 py-2 text-sm rounded-lg ${
                 scrollSyncEnabled
                   ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 text-[#333333] hover:bg-gray-200'
               }`}
             >
               スクロール同期: {scrollSyncEnabled ? 'ON' : 'OFF'}
             </button>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">デバイス</label>
+            <label className="block text-sm font-medium text-[#333333] mb-2">デバイス</label>
             <select
               value={device}
               onChange={(e) => setDevice(e.target.value as 'iphone-se' | 'iphone-15-pro-max')}
@@ -260,7 +260,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 mt-4">
+        <p className="text-sm text-[#666666] mt-4">
           {viewMode === 'side-by-side' 
             ? '2つのUIパターンを並べて比較できます。スクロール同期により、同じ位置のメニューを比較可能です。'
             : '各UIパターンを個別に確認できます。パターンをクリックして拡大表示も可能です。'
@@ -272,7 +272,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-[#333333]">
                 {patterns.find(p => p.id === selectedPatterns[0])?.name}
               </h3>
             </div>
@@ -290,7 +290,7 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-[#333333]">
                 {patterns.find(p => p.id === selectedPatterns[1])?.name}
               </h3>
             </div>
@@ -325,13 +325,13 @@ export default function PatternComparison({ menuData: initialMenuData }: Pattern
                 style={{ maxWidth: `${singleViewCardMaxWidth}px` }}
               >
                 <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">{pattern.name}</h3>
+                  <h3 className="font-semibold text-[#333333]">{pattern.name}</h3>
                   <button
                     onClick={() => {
                       setExpandedPattern(pattern.id);
                       setViewMode('single');
                     }}
-                    className="text-blue-600 hover:text-blue-700"
+                    className="text-[#0099E6] hover:text-[#0088cc]"
                   >
                     <Maximize2 className="w-5 h-5" />
                   </button>

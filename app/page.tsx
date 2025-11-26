@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import MenuScraper from '@/components/MenuScraper';
-import UIPatternViewer from '@/components/UIPatternViewer';
+import ScreenFlowPreview from '@/components/ScreenFlowPreview';
 import PatternComparison from '@/components/PatternComparison';
 import SalesTalkRecommendation from '@/components/SalesTalkRecommendation';
 
@@ -11,57 +11,57 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'scraper' | 'viewer' | 'comparison' | 'talk'>('scraper');
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-[#EBF7FF]">
       <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            RecruitMO UI プロトタイプ
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <h1 className="text-2xl font-bold text-[#333333]">
+          RING39　モバイルオーダー　プレビューツール
           </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            モバイルオーダーシステムのUIパターン比較ツール
+          <p className="text-sm text-[#666666] mt-1">
+            UIパターンの比較ツール
           </p>
         </div>
       </header>
 
       <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-4">
             <button
               onClick={() => setViewMode('scraper')}
               className={`px-4 py-2 text-sm font-medium ${
                 viewMode === 'scraper'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-[#0099E6] border-b-2 border-[#0099E6]'
+                  : 'text-[#666666] hover:text-[#333333]'
               }`}
             >
               メニュー収集
             </button>
             <button
-              onClick={() => setViewMode('viewer')}
-              className={`px-4 py-2 text-sm font-medium ${
-                viewMode === 'viewer'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              UIパターン表示
-            </button>
-            <button
               onClick={() => setViewMode('comparison')}
               className={`px-4 py-2 text-sm font-medium ${
                 viewMode === 'comparison'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-[#0099E6] border-b-2 border-[#0099E6]'
+                  : 'text-[#666666] hover:text-[#333333]'
               }`}
             >
               パターン比較
             </button>
             <button
+              onClick={() => setViewMode('viewer')}
+              className={`px-4 py-2 text-sm font-medium ${
+                viewMode === 'viewer'
+                  ? 'text-[#0099E6] border-b-2 border-[#0099E6]'
+                  : 'text-[#666666] hover:text-[#333333]'
+              }`}
+            >
+              画面遷移フロー
+            </button>
+            <button
               onClick={() => setViewMode('talk')}
               className={`px-4 py-2 text-sm font-medium ${
                 viewMode === 'talk'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-[#0099E6] border-b-2 border-[#0099E6]'
+                  : 'text-[#666666] hover:text-[#333333]'
               }`}
             >
               営業トーク
@@ -70,12 +70,19 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {viewMode === 'scraper' && (
-          <MenuScraper onDataCollected={setMenuData} />
+          <MenuScraper 
+            onDataCollected={(data) => {
+              setMenuData(data);
+              if (data.length > 0) {
+                setViewMode('comparison');
+              }
+            }} 
+          />
         )}
         {viewMode === 'viewer' && (
-          <UIPatternViewer menuData={menuData} />
+          <ScreenFlowPreview menuData={menuData} />
         )}
         {viewMode === 'comparison' && (
           <PatternComparison menuData={menuData} />

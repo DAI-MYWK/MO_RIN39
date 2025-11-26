@@ -3,12 +3,16 @@
 import { useState, useMemo } from 'react';
 import { 
   MessageSquare, Copy, Check, User, Store, 
-  Info, ChevronRight, Star, Coffee, Utensils, ShoppingBag,
-  ArrowRight, Zap, TrendingUp, LayoutGrid, Image as ImageIcon,
-  Search, DollarSign, MousePointer
+  Info, ChevronRight, Monitor, Smartphone
 } from 'lucide-react';
 import { useMenuStore } from '@/store/menuStore';
-import { MenuItem } from '@/types/menu';
+import { MenuItem, UIPattern } from '@/types/menu';
+import ScreenFlowPreview from './ScreenFlowPreview';
+import PatternCategoryFocused from './patterns/PatternCategoryFocused';
+import PatternPhotoFocused from './patterns/PatternPhotoFocused';
+import PatternRecommendedFocused from './patterns/PatternRecommendedFocused';
+import PatternGridLayout from './patterns/PatternGridLayout';
+import DeviceSimulator from './DeviceSimulator';
 
 interface TalkScenario {
   id: string;
@@ -16,6 +20,12 @@ interface TalkScenario {
   category: string;
   situation: string;
   talkTemplate: (data: MenuAnalysisData) => string;
+  // 関連する画面遷移ステップ（1-5）
+  relatedFlowSteps?: number[];
+  // 関連するUIパターン
+  relatedUIPatterns?: UIPattern[];
+  // 表示タイプ: 'flow' | 'ui' | 'both'
+  displayType?: 'flow' | 'ui' | 'both';
 }
 
 // メニュー分析データの型定義
@@ -114,7 +124,10 @@ const talkScenarios: TalkScenario[] = [
 注文数や客単価が大きく変わります。
 
 今日は、お店のメニューを実際に4つのパターンで表示してみて、
-どれが一番お店に合っているか、一緒に見てみませんか？」`
+どれが一番お店に合っているか、一緒に見てみませんか？」`,
+    relatedFlowSteps: [1, 2],
+    relatedUIPatterns: ['category-focused', 'photo-focused', 'recommended-focused', 'grid-layout'],
+    displayType: 'both'
   },
   {
     id: 'demo',
@@ -123,16 +136,19 @@ const talkScenarios: TalkScenario[] = [
     situation: '複数のUIパターンを比較し、オーナーに納得感のあるデモンストレーションを行う場面',
     talkTemplate: (data) => `「こちらが4つのUIパターンです。
 
-【左：カテゴリ重視型】
+【カテゴリ重視型】
 カテゴリごとに整理されているので、『${data.popularCategory}が食べたい』というお客様には
 すぐに目的のメニューにたどり着けます。メニュー数が多いお店に適しています。
 
-【右：写真重視型】
+【写真重視型】
 大きな写真でメニューを魅力的に見せます。写真がきれいなお店や、
 見た目で選んでもらいたいメニューがある場合に効果的です。
 
 スクロールを動かすと、同じ位置のメニューを比較できます。
-どちらがお店の雰囲気に合っていますか？」`
+どちらがお店の雰囲気に合っていますか？」`,
+    relatedFlowSteps: [2],
+    relatedUIPatterns: ['category-focused', 'photo-focused'],
+    displayType: 'ui'
   },
   {
     id: 'customize',
@@ -150,7 +166,10 @@ const talkScenarios: TalkScenario[] = [
 すると、このように表示が変わります。お客様の目に留まりやすくなりますね。
 
 実際のシステムでも、このように簡単に変更できます。」`;
-    }
+    },
+    relatedFlowSteps: [2, 3],
+    relatedUIPatterns: ['recommended-focused'],
+    displayType: 'ui'
   },
   {
     id: 'closing',
@@ -175,7 +194,10 @@ const talkScenarios: TalkScenario[] = [
 
 実際の導入後も、このようにデータを見ながら調整できます。
 まずはこのパターンで始めてみませんか？」`;
-    }
+    },
+    relatedFlowSteps: [2, 3, 4],
+    relatedUIPatterns: ['recommended-focused'],
+    displayType: 'both'
   },
   {
     id: 'many-menu',
@@ -191,7 +213,10 @@ const talkScenarios: TalkScenario[] = [
 お客様がスクロールする手間が増えます。
 
 メニュー数が多い場合は、【カテゴリ重視型】がおすすめです。
-実際に見てみましょうか？」`
+実際に見てみましょうか？」`,
+    relatedFlowSteps: [1, 2],
+    relatedUIPatterns: ['category-focused'],
+    displayType: 'both'
   },
   {
     id: 'beautiful-photo',
@@ -210,83 +235,34 @@ const talkScenarios: TalkScenario[] = [
 写真のインパクトが重要です。
 
 実際に表示してみましょうか？」`;
-    }
+    },
+    relatedFlowSteps: [2, 3],
+    relatedUIPatterns: ['photo-focused'],
+    displayType: 'both'
   }
 ];
 
-// 診断ロジックと結果の定義
-interface DiagnosisResult {
-  id: string;
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  recommendedPattern: string;
-  color: string;
-  bgColor: string;
-}
+// UIパターンコンポーネントのマッピング
+const patternComponents = {
+  'category-focused': PatternCategoryFocused,
+  'photo-focused': PatternPhotoFocused,
+  'recommended-focused': PatternRecommendedFocused,
+  'grid-layout': PatternGridLayout,
+};
 
-const DIAGNOSIS_RESULTS: Record<string, DiagnosisResult> = {
-  search: {
-    id: 'search',
-    title: '多品目・検索重視型',
-    description: 'メニュー数が多いため、カテゴリ分けで目的の商品に素早くたどり着けるようにします。',
-    icon: <Search className="w-8 h-8" />,
-    recommendedPattern: 'カテゴリ重視型',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50'
-  },
-  brand: {
-    id: 'brand',
-    title: '高単価・ブランド重視型',
-    description: '高単価商品と綺麗な写真があるため、ビジュアルで価値を伝え客単価アップを狙います。',
-    icon: <Star className="w-8 h-8" />,
-    recommendedPattern: '写真重視型',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50'
-  },
-  recommend: {
-    id: 'recommend',
-    title: '一点突破・看板メニュー型',
-    description: '特定の看板メニューや高単価商品を強調し、主力商品の注文率を最大化します。',
-    icon: <TrendingUp className="w-8 h-8" />,
-    recommendedPattern: 'おすすめ重視型',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50'
-  },
-  rotation: {
-    id: 'rotation',
-    title: '低単価・回転重視型',
-    description: '低単価で品数が多いため、一覧性を高めて注文スピードを上げ、回転率を重視します。',
-    icon: <Zap className="w-8 h-8" />,
-    recommendedPattern: 'グリッドレイアウト',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50'
-  },
-  visual: {
-    id: 'visual',
-    title: 'ビジュアル訴求型',
-    description: 'ほとんどのメニューに写真があるため、カタログのようなリッチな表示で食欲を刺激します。',
-    icon: <ImageIcon className="w-8 h-8" />,
-    recommendedPattern: '写真重視型',
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50'
-  },
-  simple: {
-    id: 'simple',
-    title: 'シンプル・ミニマル型',
-    description: 'メニュー数が少ないため、余白を活かしたグリッド表示で洗練された印象を与えます。',
-    icon: <LayoutGrid className="w-8 h-8" />,
-    recommendedPattern: 'グリッドレイアウト',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50'
-  }
+const patternNames = {
+  'category-focused': 'カテゴリ重視型',
+  'photo-focused': '写真重視型',
+  'recommended-focused': 'おすすめ重視型',
+  'grid-layout': 'グリッドレイアウト',
 };
 
 export default function SalesTalkRecommendation() {
   const menuData = useMenuStore((state) => state.menuData);
-  const [selectedCategory, setSelectedCategory] = useState<string>('提案診断'); // デフォルトを診断タブに変更
+  const [selectedCategory, setSelectedCategory] = useState<string>('基本フロー');
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>(talkScenarios[0].id);
   const [copied, setCopied] = useState<string | null>(null);
+  const [selectedFlowStep, setSelectedFlowStep] = useState<number | null>(null);
 
   // メニューデータの分析
   const analysisData = useMemo(() => analyzeMenuData(menuData), [menuData]);
@@ -297,7 +273,7 @@ export default function SalesTalkRecommendation() {
   const filteredScenarios = talkScenarios.filter(s => s.category === selectedCategory);
   
   // 表示用に、現在選択されているシナリオがフィルタリング結果に含まれていない場合、最初のものを選択
-  if (selectedCategory !== '提案診断' && !filteredScenarios.find(s => s.id === selectedScenarioId)) {
+  if (!filteredScenarios.find(s => s.id === selectedScenarioId)) {
     if (filteredScenarios.length > 0) {
       setSelectedScenarioId(filteredScenarios[0].id);
     }
@@ -315,44 +291,71 @@ export default function SalesTalkRecommendation() {
   // トークを段落で分割して、会話形式で表示
   const talkParagraphs = currentTalk.split('\n\n').filter(p => p.trim() !== '');
 
-  // 6パターンの診断ロジック
-  const getDiagnosisResult = (): DiagnosisResult => {
-    // 1. 多品目・検索重視型
-    if (analysisData.isManyItems) {
-      return DIAGNOSIS_RESULTS.search;
-    }
-    // 2. 高単価・ブランド重視型
-    if (analysisData.hasHighPriceItems && analysisData.isPhotoRich) {
-      return DIAGNOSIS_RESULTS.brand;
-    }
-    // 5. ビジュアル訴求型 (写真は多いが高単価ではない)
-    if (analysisData.isPhotoRich) {
-      return DIAGNOSIS_RESULTS.visual;
-    }
-    // 6. シンプル・ミニマル型
-    if (analysisData.isFewItems) {
-      return DIAGNOSIS_RESULTS.simple;
-    }
-    // 4. 低単価・回転重視型
-    if (analysisData.isLowPrice) {
-      return DIAGNOSIS_RESULTS.rotation;
-    }
-    // 3. 一点突破・看板メニュー型 (その他デフォルト)
-    return DIAGNOSIS_RESULTS.recommend;
+  // 画面遷移フローの特定ステップを表示するコンポーネント
+  const renderFlowStep = (stepNumber: number) => {
+    const steps = [
+      { number: 1, title: 'QRコード読取', description: 'テーブルのQRコードをスキャン' },
+      { number: 2, title: 'メニュー閲覧', description: 'カテゴリからメニューを探す' },
+      { number: 3, title: '注文リスト追加', description: 'メニューを選んでカスタマイズ' },
+      { number: 4, title: '注文送信', description: '注文内容を確認して送信' },
+      { number: 5, title: 'お会計', description: '合計金額を確認' },
+    ];
+    const step = steps.find(s => s.number === stepNumber);
+    if (!step) return null;
+
+    return (
+      <div className="bg-white rounded-lg border-2 border-[#0099E6] p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 bg-[#0099E6] text-white rounded-full flex items-center justify-center text-sm font-bold">
+            {step.number}
+          </div>
+          <div>
+            <div className="font-bold text-[#333333]">{step.title}</div>
+            <div className="text-xs text-[#666666]">{step.description}</div>
+          </div>
+        </div>
+        <div className="mt-3 text-sm text-[#666666] bg-[#EBF7FF] p-3 rounded">
+          {step.number === 1 && 'お客様がテーブルのQRコードをスキャンすると、メニュー画面に遷移します。'}
+          {step.number === 2 && 'カテゴリからメニューを探し、気になる商品をタップします。'}
+          {step.number === 3 && 'メニュー詳細画面で数量やオプションを選択し、注文リストに追加します。'}
+          {step.number === 4 && '注文リストを確認し、送信ボタンを押して注文を確定します。'}
+          {step.number === 5 && '合計金額を確認し、会計依頼またはオンライン決済を行います。'}
+        </div>
+      </div>
+    );
   };
 
-  const diagnosisResult = getDiagnosisResult();
+  // UIパターンを表示するコンポーネント
+  const renderUIPattern = (patternId: UIPattern) => {
+    const PatternComponent = patternComponents[patternId];
+    if (!PatternComponent) return null;
+
+    return (
+      <div className="bg-white rounded-lg border-2 border-[#0099E6] overflow-hidden">
+        <div className="bg-[#0099E6] text-white px-4 py-2 text-sm font-bold">
+          {patternNames[patternId]}
+        </div>
+        <div className="bg-gray-100 p-4">
+          <DeviceSimulator device="iphone-se">
+            <div className="w-full h-full overflow-y-auto" style={{ maxHeight: '500px' }}>
+              <PatternComponent menuData={menuData} showHeatmap={false} editable={false} />
+            </div>
+          </DeviceSimulator>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="bg-[#EBF7FF] min-h-screen p-4 md:p-8 font-sans text-[#333333]">
       
       {/* ヘッダーエリア */}
-      <div className="max-w-5xl mx-auto mb-8 text-center">
+      <div className="max-w-[1600px] mx-auto mb-8 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-[#0099E6] mb-2">
           場面に合わせて選べる、効果的なご案内
         </h2>
         <p className="text-[#666666]">
-          お客様の状況や課題に合わせて、最適なトークスクリプトをご活用ください。
+          お客様の状況や課題に合わせて、最適なトークスクリプトとプレビューをご活用ください。
         </p>
         {menuData.length > 0 && (
           <div className="mt-2 inline-block bg-white px-4 py-1 rounded-full text-sm text-[#0099E6] border border-[#0099E6]">
@@ -361,11 +364,11 @@ export default function SalesTalkRecommendation() {
         )}
       </div>
 
-      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="max-w-[1600px] mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         
         {/* タブ切り替えエリア */}
         <div className="flex border-b border-gray-200 bg-gray-50">
-          {['提案診断', '基本フロー', 'ケース別'].map((category) => (
+          {['基本フロー', 'ケース別'].map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
@@ -383,124 +386,17 @@ export default function SalesTalkRecommendation() {
           ))}
         </div>
 
-        {selectedCategory === '提案診断' ? (
-          <div className="p-8 bg-white">
-             <div className="max-w-4xl mx-auto">
-               <div className="text-center mb-10">
-                 <h3 className="text-xl font-bold text-[#333333] mb-2">
-                   店舗データから最適な提案シナリオを診断
-                 </h3>
-                 <p className="text-[#666666]">
-                   収集したメニューデータを分析し、6つのパターンから最も効果的なアプローチを提示します。
-                 </p>
-               </div>
-
-               {/* 診断フローチャート (CSS Grid) */}
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                 {/* Q1 */}
-                 <div className={`p-6 rounded-xl border-2 transition-all ${
-                   analysisData.isManyItems ? 'border-[#0099E6] bg-blue-50 shadow-md transform scale-105' : 'border-gray-200 bg-gray-50 opacity-60'
-                 }`}>
-                   <div className="flex items-center gap-3 mb-3">
-                     <div className="w-8 h-8 rounded-full bg-[#0099E6] text-white flex items-center justify-center font-bold">Q1</div>
-                     <h4 className="font-bold text-sm">メニュー数は多い？</h4>
-                   </div>
-                   <p className="text-xs text-gray-600 mb-2">50品以上あるか</p>
-                   <div className="font-bold text-lg text-[#0099E6]">
-                     {analysisData.isManyItems ? 'YES' : 'NO'} <span className="text-sm font-normal text-gray-500">({analysisData.menuCount}品)</span>
-                   </div>
-                 </div>
-
-                 {/* Q2 */}
-                 <div className={`p-6 rounded-xl border-2 transition-all ${
-                   !analysisData.isManyItems && (analysisData.hasHighPriceItems || analysisData.isPhotoRich) 
-                     ? 'border-[#0099E6] bg-blue-50 shadow-md transform scale-105' 
-                     : 'border-gray-200 bg-gray-50 opacity-60'
-                 }`}>
-                   <div className="flex items-center gap-3 mb-3">
-                     <div className="w-8 h-8 rounded-full bg-[#0099E6] text-white flex items-center justify-center font-bold">Q2</div>
-                     <h4 className="font-bold text-sm">高単価 or 写真充実？</h4>
-                   </div>
-                   <p className="text-xs text-gray-600 mb-2">単価2000円以上 or 写真8割以上</p>
-                   <div className="font-bold text-lg text-[#0099E6]">
-                     {analysisData.hasHighPriceItems || analysisData.isPhotoRich ? 'YES' : 'NO'}
-                   </div>
-                 </div>
-
-                 {/* Q3 */}
-                 <div className={`p-6 rounded-xl border-2 transition-all ${
-                   !analysisData.isManyItems && !analysisData.hasHighPriceItems && !analysisData.isPhotoRich 
-                     ? 'border-[#0099E6] bg-blue-50 shadow-md transform scale-105' 
-                     : 'border-gray-200 bg-gray-50 opacity-60'
-                 }`}>
-                   <div className="flex items-center gap-3 mb-3">
-                     <div className="w-8 h-8 rounded-full bg-[#0099E6] text-white flex items-center justify-center font-bold">Q3</div>
-                     <h4 className="font-bold text-sm">品数は少ない？</h4>
-                   </div>
-                   <p className="text-xs text-gray-600 mb-2">20品以下か</p>
-                   <div className="font-bold text-lg text-[#0099E6]">
-                     {analysisData.isFewItems ? 'YES' : 'NO'}
-                   </div>
-                 </div>
-               </div>
-
-               {/* 診断結果カード */}
-               <div className="border-t border-gray-200 pt-8">
-                 <div className={`p-8 rounded-2xl border-2 shadow-sm text-center ${diagnosisResult.bgColor} border-opacity-50`}>
-                    <div className={`inline-flex items-center justify-center p-4 bg-white rounded-full shadow-sm mb-4 ${diagnosisResult.color}`}>
-                      {diagnosisResult.icon}
-                    </div>
-                    <div className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">DIAGNOSIS RESULT</div>
-                    <h2 className={`text-2xl font-bold mb-4 ${diagnosisResult.color}`}>
-                      推奨：{diagnosisResult.title}
-                    </h2>
-                    <p className="text-[#666666] mb-8 max-w-lg mx-auto leading-relaxed">
-                      {diagnosisResult.description}
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-2xl mx-auto">
-                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                        <div className="flex items-center gap-2 mb-2 text-gray-500 font-bold text-xs uppercase">
-                          <MousePointer className="w-4 h-4" /> Recommended UI
-                        </div>
-                        <div className={`text-lg font-bold ${diagnosisResult.color}`}>
-                          {diagnosisResult.recommendedPattern}
-                        </div>
-                      </div>
-                      
-                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                        <div className="flex items-center gap-2 mb-2 text-gray-500 font-bold text-xs uppercase">
-                          <MessageSquare className="w-4 h-4" /> Key Message
-                        </div>
-                        <div className="text-sm text-gray-700">
-                          「{diagnosisResult.title.split('」')[1]}」で<br/>
-                          <span className="font-bold">注文完了率の最大化</span>を狙いましょう
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-8 pt-6 border-t border-gray-200/50">
-                      <h4 className="font-bold text-sm text-[#333333] mb-3">このパターンのトーク例</h4>
-                      <div className="bg-white/80 p-4 rounded-lg text-sm text-[#666666] text-left leading-relaxed border border-gray-200">
-                        「データ分析の結果、御社のような{analysisData.isManyItems ? 'メニュー数が多い' : '特徴的な'}店舗では、
-                        <span className="font-bold text-[#333333] mx-1">{diagnosisResult.recommendedPattern}</span>
-                        が最も効果的です。
-                        {analysisData.highPriceMenu && `特に看板商品の『${analysisData.highPriceMenu.name}』を...`}」
-                      </div>
-                    </div>
-                 </div>
-               </div>
-             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row min-h-[600px]">
+        <div className="flex flex-col lg:flex-row min-h-[600px]">
             {/* サイドメニュー（シナリオ選択） */}
-            <div className="w-full md:w-1/3 border-r border-gray-200 bg-gray-50">
+            <div className="w-full lg:w-1/3 border-r border-gray-200 bg-gray-50">
               <div className="p-4 space-y-2">
                 {filteredScenarios.map((scenario) => (
                   <button
                     key={scenario.id}
-                    onClick={() => setSelectedScenarioId(scenario.id)}
+                    onClick={() => {
+                      setSelectedScenarioId(scenario.id);
+                      setSelectedFlowStep(null);
+                    }}
                     className={`w-full text-left p-4 rounded-lg transition-all border ${
                       selectedScenarioId === scenario.id
                         ? 'bg-white border-[#0099E6] shadow-sm ring-1 ring-[#0099E6] ring-opacity-50'
@@ -522,16 +418,22 @@ export default function SalesTalkRecommendation() {
             </div>
 
             {/* メインコンテンツエリア */}
-            <div className="w-full md:w-2/3 bg-white">
+            <div className="w-full lg:w-2/3 bg-white flex flex-col">
               {/* タイトルとアクション */}
               <div className="p-6 border-b border-gray-100 flex items-start justify-between gap-4">
-                <div>
-                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-[#0099E6] mb-2">
+                <div className="flex-1">
+                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#EBF7FF] text-[#0099E6] mb-2">
                     {currentScenario.title}
                   </div>
-                  <h3 className="text-lg font-bold text-[#333333] leading-snug">
+                  <h3 className="text-lg font-bold text-[#333333] leading-snug mb-2">
                     {currentScenario.situation}
                   </h3>
+                  {currentScenario.relatedFlowSteps && currentScenario.relatedFlowSteps.length > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-[#666666]">
+                      <Smartphone className="w-4 h-4" />
+                      <span>関連画面: {currentScenario.relatedFlowSteps.map(s => `ステップ${s}`).join(', ')}</span>
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={() => handleCopy(currentTalk, currentScenario.id)}
@@ -555,64 +457,124 @@ export default function SalesTalkRecommendation() {
                 </button>
               </div>
 
-              {/* 会話プレビュー */}
-              <div className="p-6 bg-white">
-                <div className="space-y-6">
-                  {talkParagraphs.map((paragraph, index) => (
-                    <div key={index} className="flex gap-4">
-                      {/* アイコン */}
-                      <div className="flex-shrink-0 flex flex-col items-center pt-1">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          index % 2 === 0 ? 'bg-[#EBF7FF] text-[#0099E6]' : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {index % 2 === 0 ? <User className="w-5 h-5" /> : <Store className="w-5 h-5" />}
+              {/* 会話プレビューとプレビューエリア */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-6 bg-white">
+                  {/* 会話プレビュー */}
+                  <div className="space-y-6 mb-8">
+                    {talkParagraphs.map((paragraph, index) => (
+                      <div key={index} className="flex gap-4">
+                        {/* アイコン */}
+                        <div className="flex-shrink-0 flex flex-col items-center pt-1">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            index % 2 === 0 ? 'bg-[#EBF7FF] text-[#0099E6]' : 'bg-gray-100 text-[#666666]'
+                          }`}>
+                            {index % 2 === 0 ? <User className="w-5 h-5" /> : <Store className="w-5 h-5" />}
+                          </div>
+                        </div>
+
+                        {/* テキスト */}
+                        <div className="flex-1">
+                          <div className="text-xs font-bold text-[#999999] mb-1">
+                            {index % 2 === 0 ? '営業担当' : 'オーナー様'}
+                          </div>
+                          <div className={`p-4 rounded-lg text-sm leading-relaxed whitespace-pre-wrap ${
+                            index % 2 === 0 
+                              ? 'bg-[#F5FAFF] border border-[#E6F0FA] text-[#333333]' 
+                              : 'bg-gray-50 border border-gray-100 text-[#333333]'
+                          }`}>
+                            {paragraph}
+                          </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
 
-                      {/* テキスト */}
-                      <div className="flex-1">
-                        <div className="text-xs font-bold text-[#999999] mb-1">
-                          {index % 2 === 0 ? '営業担当' : 'オーナー様'}
-                        </div>
-                        <div className={`p-4 rounded-lg text-sm leading-relaxed whitespace-pre-wrap ${
-                          index % 2 === 0 
-                            ? 'bg-[#F5FAFF] border border-[#E6F0FA] text-[#333333]' 
-                            : 'bg-gray-50 border border-gray-100 text-[#333333]'
-                        }`}>
-                          {paragraph}
-                        </div>
+                  {/* プレビューエリア */}
+                  {menuData.length > 0 && currentScenario.displayType && (
+                    <div className="border-t border-gray-200 pt-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Monitor className="w-5 h-5 text-[#0099E6]" />
+                        <h4 className="font-bold text-[#333333]">関連プレビュー</h4>
                       </div>
-                    </div>
-                  ))}
-                </div>
 
-                {/* ポイントエリア */}
-                <div className="mt-8 p-5 bg-[#F9FAFB] rounded-lg border border-gray-200">
-                  <h4 className="flex items-center gap-2 font-bold text-[#333333] mb-3">
-                    <Info className="w-5 h-5 text-[#0099E6]" />
-                    この場面でのポイント
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-xs font-bold text-[#0099E6] mb-1">推奨アクション (DO)</div>
-                      <ul className="text-sm text-[#666666] space-y-1 list-disc ml-4">
-                        <li>「一緒に見てみましょう」と共感を示す</li>
-                        <li>具体的な数値や効果を提示する</li>
-                      </ul>
+                      {/* 画面遷移フローの表示 */}
+                      {currentScenario.displayType === 'flow' || currentScenario.displayType === 'both' ? (
+                        <div className="mb-6">
+                          <h5 className="text-sm font-bold text-[#333333] mb-3 flex items-center gap-2">
+                            <Smartphone className="w-4 h-4" />
+                            画面遷移フロー
+                          </h5>
+                          {currentScenario.relatedFlowSteps && currentScenario.relatedFlowSteps.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {currentScenario.relatedFlowSteps.map(step => (
+                                <div key={step}>
+                                  {renderFlowStep(step)}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="bg-[#EBF7FF] border border-gray-200 rounded-lg p-4">
+                              <ScreenFlowPreview menuData={menuData} />
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+
+                      {/* UIパターンの表示 */}
+                      {currentScenario.displayType === 'ui' || currentScenario.displayType === 'both' ? (
+                        <div>
+                          <h5 className="text-sm font-bold text-[#333333] mb-3 flex items-center gap-2">
+                            <Monitor className="w-4 h-4" />
+                            UIパターン比較
+                          </h5>
+                          {currentScenario.relatedUIPatterns && currentScenario.relatedUIPatterns.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {currentScenario.relatedUIPatterns.map(patternId => (
+                                <div key={patternId}>
+                                  {renderUIPattern(patternId)}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="bg-[#EBF7FF] border border-gray-200 rounded-lg p-4 text-sm text-[#666666]">
+                              関連するUIパターンが設定されていません
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
                     </div>
-                    <div>
-                      <div className="text-xs font-bold text-red-500 mb-1">避けるべきアクション (DON'T)</div>
-                      <ul className="text-sm text-[#666666] space-y-1 list-disc ml-4">
-                        <li>一方的に説明を進める</li>
-                        <li>専門用語を多用する</li>
-                      </ul>
+                  )}
+
+                  {/* ポイントエリア */}
+                  <div className="mt-8 p-5 bg-[#F9FAFB] rounded-lg border border-gray-200">
+                    <h4 className="flex items-center gap-2 font-bold text-[#333333] mb-3">
+                      <Info className="w-5 h-5 text-[#0099E6]" />
+                      この場面でのポイント
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs font-bold text-[#0099E6] mb-1">推奨アクション (DO)</div>
+                        <ul className="text-sm text-[#666666] space-y-1 list-disc ml-4">
+                          <li>「一緒に見てみましょう」と共感を示す</li>
+                          <li>具体的な数値や効果を提示する</li>
+                          <li>プレビューを見せながら説明する</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-red-500 mb-1">避けるべきアクション (DON'T)</div>
+                        <ul className="text-sm text-[#666666] space-y-1 list-disc ml-4">
+                          <li>一方的に説明を進める</li>
+                          <li>専門用語を多用する</li>
+                          <li>視覚的な説明を省く</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
       </div>
     </div>
   );
