@@ -4,11 +4,11 @@ import { useState } from 'react';
 import MenuScraper from '@/components/MenuScraper';
 import ScreenFlowPreview from '@/components/ScreenFlowPreview';
 import PatternComparison from '@/components/PatternComparison';
-import SalesTalkRecommendation from '@/components/SalesTalkRecommendation';
+import SalesTips from '@/components/SalesTips';
 
 export default function Home() {
   const [menuData, setMenuData] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'scraper' | 'viewer' | 'comparison' | 'talk'>('scraper');
+  const [viewMode, setViewMode] = useState<'scraper' | 'viewer' | 'comparison' | 'tips'>('scraper');
 
   return (
     <main className="min-h-screen bg-[#EBF7FF]">
@@ -57,14 +57,14 @@ export default function Home() {
               画面遷移フロー
             </button>
             <button
-              onClick={() => setViewMode('talk')}
+              onClick={() => setViewMode('tips')}
               className={`px-4 py-2 text-sm font-medium ${
-                viewMode === 'talk'
+                viewMode === 'tips'
                   ? 'text-[#0099E6] border-b-2 border-[#0099E6]'
                   : 'text-[#666666] hover:text-[#333333]'
               }`}
             >
-              営業トーク
+              売上アップのヒント
             </button>
           </div>
         </div>
@@ -87,8 +87,8 @@ export default function Home() {
         {viewMode === 'comparison' && (
           <PatternComparison menuData={menuData} />
         )}
-        {viewMode === 'talk' && (
-          <SalesTalkRecommendation />
+        {viewMode === 'tips' && (
+          <SalesTips menuData={menuData} />
         )}
       </div>
     </main>
